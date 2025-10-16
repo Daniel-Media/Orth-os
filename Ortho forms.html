@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>orthoforms</title>
+  <base href="./">
+
+  <!-- Logo preload -->
+  <link rel="preload" href="./assets/orthodont_logo_08.2014.png" as="image" />
+
+  <style>
+    :root{
+      --ink:#0f172a; --muted:#6b7280;
+      --bg1:#fff7f2; --card:#ffffff; --border:#e5e7eb; --shadow:0 14px 44px rgba(2,6,23,.12);
+      --brand:#ff6a28; --brand-ink:#7a2e0d;
+      --ortho:#2b55a5; --ortho-ink:#1e3a8a;
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink); background:linear-gradient(135deg,#f9fafb 20%, #ffeade 100%);
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{max-width:1100px;margin:26px auto 12px;padding:0 16px;display:flex}
+    .header-stack{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+    header img.logo{height:64px;max-width:420px;width:auto;cursor:pointer;display:block;image-rendering:auto}
+    .brand-title{font-weight:900;font-size:1.8rem;letter-spacing:.2px;color:var(--ortho-ink);line-height:1}
+    .welcome{color:var(--muted)}
+
+    /* Page container */
+    .container{max-width:1100px;margin:0 auto;padding:0 16px 120px}
+
+    /* Section titles */
+    .section-title{margin:22px 0 10px;font-weight:900;color:var(--ortho-ink)}
+
+    /* Tiles (Home) */
+    .tile{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:22px; margin-bottom:18px; display:flex;align-items:center;gap:18px;
+      box-shadow:var(--shadow); cursor:pointer;
+    }
+    .tile:hover{transform:translateY(-1px);transition:.15s ease}
+    .tile .icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;background:#eef2ff;border:1px solid #dbe1f5;flex:0 0 56px}
+    .i{width:22px;height:22px;display:inline-block}
+    .tile .txt{flex:1}
+    .tile .txt .title{font-weight:800;font-size:1.05rem}
+    .tile .txt .sub{font-size:.95rem;color:var(--muted)}
+    .tile .open{background:var(--brand);color:#fff;border:0;border-radius:999px;padding:11px 16px;font-weight:900;cursor:pointer;font-size:1rem}
+    .tile .open:hover{filter:brightness(.95)}
+
+    /* Modal base */
+    dialog{border:0;border-radius:22px;padding:0;box-shadow:var(--shadow);max-width:760px;width:calc(100% - 32px)}
+    .modal{padding:16px}
+    .kv-list{display:flex;flex-direction:column;gap:12px}
+    .kv-btn{
+      background:var(--ortho);border:1px solid var(--ortho);color:#fff;border-radius:14px;padding:14px 16px;font-weight:900;
+      display:flex;align-items:center;gap:10px;justify-content:center;cursor:pointer;font-size:1.05rem;
+    }
+    .kv-btn:hover{background:var(--ortho-ink);border-color:var(--ortho-ink)}
+    .kv-close{margin-left:auto;background:#f3f4f6;border:1px solid var(--border);border-radius:10px;padding:6px 10px;cursor:pointer}
+
+    /* Cards / Fieldsets */
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:26px 22px 30px; margin-top:20px;
+    }
+    form{display:flex;flex-direction:column;gap:40px}
+
+    /* Legenden tiefer im Container */
+    fieldset.card{border:1px solid var(--border); position:relative; padding-top:84px}
+    legend{font-weight:900;margin:0; position:absolute; top:28px; left:22px}
+
+    label{font-weight:800;margin:0 0 8px;display:block}
+
+    /* Grid */
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+    @media (max-width:900px){ .row{grid-template-columns:1fr} }
+
+    /* Inputs */
+    input[type=text],input[type=date],input[type=tel],input[type=email],select,textarea{
+      width:100%; border:1px solid var(--border); border-radius:12px; padding:14px 14px; font-size:1rem; background:#fff;
+    }
+    textarea{min-height:80px;resize:vertical}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#94a3b8;box-shadow:0 0 0 4px rgba(148,163,184,.25)}
+
+    /* Select Pfeil */
+    select{
+      -webkit-appearance:none; -moz-appearance:none; appearance:none;
+      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="%232b55a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+      background-repeat:no-repeat; background-position:right 12px center; padding-right:44px;
+    }
+    .hint{font-size:.85rem;color:var(--muted);margin-top:6px}
+
+    /* Symptom & Awareness Grids */
+    .symptoms{display:grid;grid-template-columns:1fr 1fr;gap:16px 32px}
+    .awareness{display:grid;grid-template-columns:1fr 1fr;gap:16px 32px}
+    @media (max-width:900px){ .symptoms,.awareness{grid-template-columns:1fr} }
+
+    /* Ja/Nein Logik */
+    .yn{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+    .yn label{font-weight:600}
+    .details{margin-top:10px}
+    .hidden{display:none}
+
+    /* Consent */
+    .consent-text{
+      background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:20px;font-size:1.06rem;line-height:1.6;
+    }
+
+    /* Signatur */
+    .sig-wrap{display:flex;flex-direction:column;gap:14px}
+    .sig-canvas{width:100%;height:320px;border:1px dashed #cbd5e1;border-radius:12px;background:#fff;touch-action:none;cursor:crosshair}
+    .sig-tools{display:flex;gap:8px}
+    .btn{background:#f1f5f9;border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn:hover{background:#e2e8f0}
+    .actions{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+    .primary{background:var(--brand);border:0;color:#fff;border-radius:12px;padding:14px 18px;font-weight:900;cursor:pointer;font-size:1rem}
+    .secondary{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-weight:900;cursor:pointer}
+
+    /* Eingebettete Zusatzformulare */
+    #extraForms h1,#extraForms h2,#extraForms h3{color:var(--ortho-ink);font-weight:900;margin:0 0 10px}
+    #extraForms p,#extraForms li{font-size:1rem;line-height:1.6}
+    #extraForms label{font-weight:600}
+    #extraForms input[type=text],#extraForms input[type=date],#extraForms input[type=tel],#extraForms input[type=email],
+    #extraForms select,#extraForms textarea{
+      width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:1rem; background:#fff;
+    }
+    #extraForms .hint{font-size:.85rem;color:var(--muted);margin-top:6px}
+    .patient-name-autofill{font-weight:800;border-bottom:2px dotted #cbd5e1;padding:0 2px}
+
+    /* ========= Form-Selector (Lightbox) ========= */
+    .formsel-head{
+      display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:12px
+    }
+    .formsel-meta{font-weight:700;color:var(--ortho-ink)}
+    .formsel-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:700}
+    .chip.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .chip.muted{background:#f3f4f6}
+    .formsel-search{display:flex;gap:8px}
+    .formsel-search input{min-width:260px}
+    .count-badge{background:#eef2ff;border:1px solid #dbe1f5;color:#1e3a8a;border-radius:999px;padding:6px 10px;font-weight:800}
+
+    .cat{border:1px solid var(--border);border-radius:14px;padding:12px 12px;margin:10px 0;background:#fff}
+    .cat h4{margin:2px 0 10px;font-size:1.02rem;color:var(--ink)}
+    .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+    @media (max-width:800px){ .cat-grid{grid-template-columns:1fr} }
+
+    .choice{display:flex;gap:10px;align-items:flex-start;border:1px solid #e6e8ef;border-radius:12px;padding:10px 12px}
+    .choice input{width:18px;height:18px;margin-top:2px}
+    .choice .t{font-weight:800}
+    .choice .s{font-size:.9rem;color:var(--muted)}
+
+    .formsel-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-stack">
+      <a href="#" id="homeLink" aria-label="Zur Startseite">
+        <img
+          class="logo"
+          id="orthoLogo"
+          alt="Orthodont – Kieferorthopädie Logo"
+          src="./assets/orthodont_logo_08.2014.png"
+          loading="eager"
+          onerror="this.onerror=null;this.src='./assets/logo.png';"
+        />
+      </a>
+      <div class="brand-title">orthoforms</div>
+      <div class="welcome">Herzlich Willkommen! Bitte Patiententyp wählen.</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- HOME -->
+    <section id="homeView">
+      <div class="section-title">Erwachsene</div>
+
+      <a href="#" class="tile" data-patient="adult" data-status="new">
+        <div class="icon" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="9" cy="7" r="4" stroke="#0f172a" stroke-width="2"/>
+            <path d="M19 8v6M16 11h6" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="txt">
+          <div class="title">Neupatient</div>
+          <div class="sub">KV wählen und starten</div>
+        </div>
+        <button class="open">Öffnen</button>
+      </a>
+
+      <a href="#" class="tile" data-patient="adult" data-status="existing">
+        <div class="icon" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24" fill="none">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="#0f172a" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="txt">
+          <div class="title">Bestandspatient</div>
+          <div class="sub">KV wählen, Formulare auswählen</div>
+        </div>
+        <button class="open">Öffnen</button>
+      </a>
+
+      <div class="section-title">Kinder</div>
+
+      <a href="#" class="tile" data-patient="child" data-status="new">
+        <div class="icon" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24" fill="none">
+            <circle cx="8" cy="7" r="3" stroke="#0f172a" stroke-width="2"/>
+            <path d="M2 19a6 6 0 0 1 12 0" stroke="#0f172a" stroke-width="2"/>
+            <path d="M19 8v6M16 11h6" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="txt">
+          <div class="title">Neupatient</div>
+          <div class="sub">KV wählen und starten</div>
+        </div>
+        <button class="open">Öffnen</button>
+      </a>
+
+      <a href="#" class="tile" data-patient="child" data-status="existing">
+        <div class="icon" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24" fill="none">
+            <circle cx="8" cy="7" r="3" stroke="#0f172a" stroke-width="2"/>
+            <path d="M2 19a6 6 0 0 1 12 0" stroke="#0f172a" stroke-width="2"/>
+            <path d="M12 9h7a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7" stroke="#0f172a" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="txt">
+          <div class="title">Bestandspatient</div>
+          <div class="sub">KV wählen, Formulare auswählen</div>
+        </div>
+        <button class="open">Öffnen</button>
+      </a>
+    </section>
+
+    <!-- FORM VIEW -->
+    <section id="formView" class="hidden">
+      <div class="card">
+        <div class="pill" id="formKeyPill">—</div>
+        <h2 id="formTitle" style="margin:12px 0 4px">Anmeldebogen</h2>
+
+        <form id="form">
+          <!-- Persönliche Daten -->
+          <fieldset class="card anam">
+            <legend>Persönliche Daten</legend>
+            <div class="row">
+              <div><label for="vorname">Vorname</label><input id="vorname" name="vorname" type="text"></div>
+              <div><label for="nachname">Nachname</label><input id="nachname" name="nachname" type="text"></div>
+            </div>
+            <div class="row">
+              <div><label for="geburtsdatum">Geb.-Datum</label><input id="geburtsdatum" name="geburtsdatum" type="date"></div>
+              <div><label for="email">E-Mail</label><input id="email" name="email" type="email"></div>
+            </div>
+            <div class="row">
+              <div><label for="strasse">Straße / Haus-Nr.</label><input id="strasse" name="strasse" type="text"></div>
+              <div><label for="plz">Postleitzahl</label><input id="plz" name="plz" type="text" inputmode="numeric"></div>
+            </div>
+            <div class="row">
+              <div><label for="wohnort">Wohnort</label><input id="wohnort" name="wohnort" type="text"></div>
+              <div><label for="telefon">Telefon</label><input id="telefon" name="telefon" type="tel"></div>
+            </div>
+            <div class="row">
+              <div><label for="mobil">Mobil</label><input id="mobil" name="mobil" type="tel"></div>
+              <div><label for="arbeitgeber">Beruf / Arbeitgeber</label><input id="arbeitgeber" name="arbeitgeber" type="text"></div>
+            </div>
+            <div class="row">
+              <div><label for="zahnarzt">Zahnarzt</label><input id="zahnarzt" name="zahnarzt" type="text"></div>
+              <div><label for="iban">IBAN (für Erstattungen)</label><input id="iban" name="iban" type="text" placeholder="DE…"></div>
+            </div>
+            <div class="row">
+              <div><label for="bic">BIC</label><input id="bic" name="bic" type="text" placeholder="z. B. DEUTDEBBXXX"></div>
+              <div>
+                <label for="kasse">Krankenkasse</label>
+                <select id="kasse" name="kasse">
+                  <option value="" selected disabled>Bitte wählen …</option>
+                </select>
+                <div id="kasseSonstige" class="hidden" style="margin-top:8px">
+                  <input type="text" id="kasseFreitext" name="kasseFreitext" placeholder="Name der Krankenkasse"/>
+                </div>
+                <div class="hint">Bei Selbstzahlern bitte „Sonstige / Andere“ wählen und freitextlich eintragen.</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Erziehungsberechtigte (nur Kinder, nur bei Neupatient) -->
+          <fieldset id="guardianBlock" class="card anam hidden">
+            <legend>Erziehungsberechtigte*r</legend>
+            <div class="row">
+              <div><label for="guard_name">Name</label><input id="guard_name" name="guard_name" type="text"></div>
+              <div><label for="guard_rel">Beziehung</label><input id="guard_rel" name="guard_rel" type="text" placeholder="Mutter / Vater / Sorgeberechtigte*r"></div>
+            </div>
+            <div class="row">
+              <div><label for="guard_phone">Telefon</label><input id="guard_phone" name="guard_phone" type="tel"></div>
+              <div><label for="guard_mail">E-Mail</label><input id="guard_mail" name="guard_mail" type="email"></div>
+            </div>
+            <div class="row">
+              <div style="grid-column:1/-1"><label for="guard_addr">Anschrift (falls abweichend)</label><input id="guard_addr" name="guard_addr" type="text"></div>
+            </div>
+          </fieldset>
+
+          <!-- Vorbehandlung & Beschwerden (nur Neupatient) -->
+          <fieldset class="card anam">
+            <legend>Vorbehandlung & Beschwerden</legend>
+
+            <div>
+              <label>Waren Sie bereits in kieferorthopädischer Behandlung?</label>
+              <div class="yn">
+                <label><input type="radio" name="vorbeh" value="Ja" data-toggle="#vorbeh_details"> Ja</label>
+                <label><input type="radio" name="vorbeh" value="Nein" data-toggle="#vorbeh_details"> Nein</label>
+              </div>
+              <div id="vorbeh_details" class="details hidden"><textarea name="vorbeh_text" placeholder="Wo, wann, wie lange?"></textarea></div>
+            </div>
+
+            <div>
+              <label>Was stört Sie am meisten an Ihrer Zahn-/Kieferstellung?</label>
+              <textarea name="stoert" placeholder="Kurz beschreiben"></textarea>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Atmen Sie überwiegend durch?</label>
+                <div class="yn">
+                  <label><input type="radio" name="atmung" value="Nase"> Nase</label>
+                  <label><input type="radio" name="atmung" value="Mund"> Mund</label>
+                </div>
+              </div>
+              <div>
+                <label>Welche der folgenden Symptome haben Sie bei sich festgestellt?</label>
+                <div class="symptoms">
+                  <label><input type="checkbox" name="sym_zp"> Zähnepressen / Gelenkknacken</label>
+                  <label><input type="checkbox" name="sym_sprache"> Sprachfehler</label>
+                  <label><input type="checkbox" name="sym_schnarchen"> Schnarchen</label>
+                  <label><input type="checkbox" name="sym_knirschen"> Knirschen</label>
+                  <label><input type="checkbox" id="sym_sonst"> Sonstige</label>
+                </div>
+                <div id="sym_sonst_text" class="details hidden"><input type="text" name="sym_sonst_text" placeholder="Bitte angeben"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Gesundheitsfragen (nur Neupatient) -->
+          <fieldset class="card anam">
+            <legend>Besteht oder bestanden</legend>
+
+            <div class="row">
+              <div>
+                <label>Allergien?</label>
+                <div class="yn">
+                  <label><input type="radio" name="allergie" value="Ja" data-toggle="#allergie_details"> Ja</label>
+                  <label><input type="radio" name="allergie" value="Nein" data-toggle="#allergie_details"> Nein</label>
+                </div>
+                <div id="allergie_details" class="details hidden"><input type="text" name="allergie_text" placeholder="Welche?"></div>
+              </div>
+
+              <div>
+                <label>Blutgerinnungsstörung?</label>
+                <div class="yn">
+                  <label><input type="radio" name="blut" value="Ja" data-toggle="#blut_details"> Ja</label>
+                  <label><input type="radio" name="blut" value="Nein" data-toggle="#blut_details"> Nein</label>
+                </div>
+                <div id="blut_details" class="details hidden"><input type="text" name="blut_text" placeholder="Details"></div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Leberentzündung / Hepatitis / Gelbsucht?</label>
+                <div class="yn">
+                  <label><input type="radio" name="leber" value="Ja" data-toggle="#leber_details"> Ja</label>
+                  <label><input type="radio" name="leber" value="Nein" data-toggle="#leber_details"> Nein</label>
+                </div>
+                <div id="leber_details" class="details hidden"><input type="text" name="leber_text" placeholder="Details"></div>
+              </div>
+
+              <div>
+                <label>Tuberkulose?</label>
+                <div class="yn">
+                  <label><input type="radio" name="tbc" value="Ja" data-toggle="#tbc_details"> Ja</label>
+                  <label><input type="radio" name="tbc" value="Nein" data-toggle="#tbc_details"> Nein</label>
+                </div>
+                <div id="tbc_details" class="details hidden"><input type="text" name="tbc_text" placeholder="Details"></div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Erkrankungen des Immunsystems?</label>
+                <div class="yn">
+                  <label><input type="radio" name="immun" value="Ja" data-toggle="#immun_details"> Ja</label>
+                  <label><input type="radio" name="immun" value="Nein" data-toggle="#immun_details"> Nein</label>
+                </div>
+                <div id="immun_details" class="details hidden"><input type="text" name="immun_text" placeholder="Details"></div>
+              </div>
+
+              <div>
+                <label>Unfälle im Zahn-/Kieferbereich?</label>
+                <div class="yn">
+                  <label><input type="radio" name="unfall" value="Ja" data-toggle="#unfall_details"> Ja</label>
+                  <label><input type="radio" name="unfall" value="Nein" data-toggle="#unfall_details"> Nein</label>
+                </div>
+                <div id="unfall_details" class="details hidden"><input type="text" name="unfall_text" placeholder="Details"></div>
+              </div>
+            </div>
+
+            <div>
+              <label>Sonstige Erkrankungen?</label>
+              <div class="yn">
+                <label><input type="radio" name="sonst_erkr" value="Ja" data-toggle="#sonst_erkr_details"> Ja</label>
+                <label><input type="radio" name="sonst_erkr" value="Nein" data-toggle="#sonst_erkr_details"> Nein</label>
+              </div>
+              <div id="sonst_erkr_details" class="details hidden"><textarea name="sonst_erkr_text" placeholder="Welche sonstigen Erkrankungen liegen vor?"></textarea></div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Nehmen Sie regelmäßig Medikamente?</label>
+                <div class="yn">
+                  <label><input type="radio" name="medik" value="Ja" data-toggle="#medik_details"> Ja</label>
+                  <label><input type="radio" name="medik" value="Nein" data-toggle="#medik_details"> Nein</label>
+                </div>
+                <div id="medik_details" class="details hidden"><input type="text" name="medik_text" placeholder="Welche?"></div>
+              </div>
+
+              <div>
+                <label>Wurden in den letzten zwei Jahren Röntgenaufnahmen gemacht?</label>
+                <div class="yn">
+                  <label><input type="radio" name="rx" value="Ja" data-toggle="#rx_details"> Ja</label>
+                  <label><input type="radio" name="rx" value="Nein" data-toggle="#rx_details"> Nein</label>
+                </div>
+                <div id="rx_details" class="details hidden"><input type="text" name="rx_text" placeholder="Was und wann?"></div>
+              </div>
+            </div>
+
+            <div>
+              <label>Besteht eine Schwangerschaft?</label>
+              <div class="yn">
+                <label><input type="radio" name="ss" value="Ja" data-toggle="#ss_details"> Ja</label>
+                <label><input type="radio" name="ss" value="Nein" data-toggle="#ss_details"> Nein</label>
+                <label><input type="radio" name="ss" value="Ungewiss" data-toggle="#ss_details"> Ungewiss</label>
+              </div>
+              <div id="ss_details" class="details hidden"><input type="text" name="ss_text" placeholder="Details (z. B. SSW)"></div>
+            </div>
+
+            <div>
+              <label>Wie sind Sie auf uns aufmerksam geworden?</label>
+              <div class="awareness">
+                <label><input type="checkbox" name="aware_gelb"> Telefonbuch / Gelbe Seiten</label>
+                <label><input type="checkbox" name="aware_internet"> Internet</label>
+                <label><input type="checkbox" name="aware_zahnarzt"> Empfehlung des Zahnarztes</label>
+                <label><input type="checkbox" name="aware_freunde"> Empfehlung (Freunde/Familie)</label>
+                <label><input type="checkbox" name="aware_weg"> Wegweiser</label>
+                <label><input type="checkbox" id="aware_social" name="aware_social"> Social Media</label>
+                <label><input type="checkbox" id="aware_other"> Sonstige</label>
+                <div id="aware_other_text" class="details hidden" style="grid-column:1/-1"><input type="text" name="aware_text" placeholder="Bitte angeben"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Einwilligung (nur Neupatient) -->
+          <fieldset class="card anam">
+            <legend>Einwilligung zum Austausch von Patientendaten in Praxisgemeinschaften</legend>
+            <div class="consent-text">
+              Hiermit willige ich ein, dass mein behandelnder Kieferorthopäde / meine Kieferorthopädin die erhobenen
+              Patientendaten elektronisch verarbeiten darf …
+            </div>
+          </fieldset>
+
+          <!-- Unterschrift -->
+          <fieldset class="card">
+            <legend>Unterschrift</legend>
+            <div class="sig-wrap">
+              <canvas id="sig" class="sig-canvas"></canvas>
+              <div class="sig-tools">
+                <button type="button" class="btn" id="undoSig">Rückgängig</button>
+                <button type="button" class="btn" id="clearSig">Zurücksetzen</button>
+              </div>
+              <div>
+                <label for="datum">Datum</label>
+                <input type="date" id="datum" name="datum">
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary" type="button" id="savePdf">Formular speichern (PDF)</button>
+              <button class="secondary" type="button" id="toHome">Zur Startseite</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- KV Modal -->
+  <dialog id="kvDialog">
+    <div class="modal">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h3 style="margin-right:auto">Versicherungsart auswählen</h3>
+        <button class="kv-close" onclick="kvDialog.close()">✕</button>
+      </div>
+      <div class="kv-list">
+        <button class="kv-btn" data-kv="GKV">GKV</button>
+        <button class="kv-btn" data-kv="PKV">PKV</button>
+        <button class="kv-btn" data-kv="SELF">Selbstzahler</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Forms Selector Modal (Bestandspatienten) -->
+  <dialog id="formsDialog">
+    <div class="modal">
+      <div class="formsel-head">
+        <div class="formsel-meta" id="formselMeta">Formulare auswählen</div>
+        <button class="kv-close" type="button" id="formsClose">✕</button>
+      </div>
+
+      <div class="formsel-tools">
+        <span class="count-badge" id="selCount">0 gewählt</span>
+        <button class="chip muted" id="btnRec">Empfohlene markieren</button>
+        <button class="chip muted" id="btnAll">Alle</button>
+        <button class="chip muted" id="btnNone">Keins</button>
+        <div class="formsel-search">
+          <input type="text" id="formSearch" placeholder="Suchen …">
+        </div>
+      </div>
+
+      <div id="formChoices" style="margin-top:10px"></div>
+
+      <div class="formsel-footer">
+        <button class="secondary" type="button" id="formsCancel">Abbrechen</button>
+        <button class="kv-btn" type="button" id="formsConfirm">Weiter</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    // ======= State =======
+    const homeView = document.getElementById('homeView');
+    const formView = document.getElementById('formView');
+    const kvDialog = document.getElementById('kvDialog');
+    const formsDialog = document.getElementById('formsDialog');
+    const formChoices = document.getElementById('formChoices');
+    const form = document.getElementById('form');
+    const formKeyPill = document.getElementById('formKeyPill');
+    const formTitle = document.getElementById('formTitle');
+    const guardianBlock = document.getElementById('guardianBlock');
+    let pending = null; // {patient, status}
+    let kvType = null;  // GKV | PKV | SELF
+    let currentKey = null;
+    let selectedExtraFiles = null; // Auswahl aus der Lightbox (Bestandspatient)
+
+    // ======= Logo robust laden (Fallbacks) =======
+    const logoEl = document.getElementById('orthoLogo');
+    logoEl.addEventListener('error', () => console.warn('Logo konnte nicht geladen werden:', logoEl.src));
+    (function ensureLogo(){
+      const tryLocal = [
+        './assets/orthodont_logo_08.2014.png',
+        'assets/orthodont_logo_08.2014.png',
+        './assets/logo.png',
+        'assets/logo.png',
+        new URL('./assets/logo.png', window.location.href).href
+      ];
+      let i = 0;
+      function tryNext(){
+        if (i >= tryLocal.length) return;
+        const test = new Image();
+        test.onload = () => { logoEl.src = tryLocal[i]; };
+        test.onerror = () => { i++; tryNext(); };
+        test.src = tryLocal[i];
+      }
+      setTimeout(() => {
+        if (!logoEl.complete || !logoEl.naturalWidth) tryNext();
+      }, 100);
+    })();
+
+    // ======= Krankenkassen =======
+    const GKV_INSURERS = [
+      "Techniker Krankenkasse (TK)","Barmer","DAK-Gesundheit","KKH","hkk",
+      "HEK – Hanseatische Krankenkasse","IKK classic","IKK gesund plus","IKK Südwest","IKK Brandenburg und Berlin",
+      "AOK Baden-Württemberg","AOK Bayern","AOK Bremen/Bremerhaven","AOK Hessen","AOK Niedersachsen",
+      "AOK Nordost","AOK NordWest","AOK PLUS","AOK Rheinland/Hamburg","AOK Rheinland-Pfalz/Saarland","AOK Sachsen-Anhalt",
+      "SBK (Siemens BKK)","BIG direkt gesund","pronova BKK","BKK VBU","BKK Mobil Oil","BKK Pfalz","Bosch BKK",
+      "Audi BKK","Novitas BKK","mhplus BKK","BKK R+V","BKK Linde","BKK Gildemeister Seidensticker"
+    ];
+    const PKV_INSURERS = [
+      "Debeka","Allianz","AXA","DKV (ERGO)","HanseMerkur","Signal Iduna","HUK-COBURG","LVM","R+V",
+      "Die Continentale","ARAG","Barmenia","Gothaer","Württembergische","Hallesche","SDK","uniVersa",
+      "UKV – Union Krankenversicherung","Münchener Verein","INTER Krankenversicherung","LKH – Landeskrankenhilfe",
+      "DEVK","Concordia","NÜRNBERGER","ottonova","PAX-Familienfürsorge"
+    ];
+
+    // ======= Formular-Mapping =======
+    const FORMS_BASE = './Neue%20Web%20formulare/';
+
+    // Empfohlene Formulare je Patient/KV
+    const FORM_MAP = {
+      adult: {
+        GKV:  ['aufklaerung-gkv-erw web.html','AVL-Begleitleistungen-GKV web.html','entbindung-schweigepflicht web.html'],
+        PKV:  ['behandlungsauftrag-Privat web.html','information-zur-privatabrechnung web.html','vereinbarung-privatliquidation web.html','entbindung-schweigepflicht web.html'],
+        SELF: ['aufklaerung-selbstzahler-erw web.html','entbindung-schweigepflicht web.html']
+      },
+      child: {
+        GKV:  ['aufklaerung-gkv-kind web.html','entbindung-schweigepflicht web.html'],
+        PKV:  ['aufklaerung-privat-kind web.html','entbindung-schweigepflicht web.html'],
+        SELF: ['aufklaerung-privat-kind web.html','entbindung-schweigepflicht web.html']
+      }
+    };
+
+    // Vollständige Liste mit Kategorien (patient: 'adult'|'child'|'both', kv: 'GKV'|'PKV'|'SELF'|'ALL')
+    const ALL_FORMS = [
+      // Beratung
+      {file:'entbindung-schweigepflicht web.html',        title:'Entbindung von der Schweigepflicht', patient:'both',  kv:'ALL',  cat:'Beratung'},
+      {file:'einwilligung_tomas_pins web.html',           title:'Einwilligung – TOMAS Pins',          patient:'both',  kv:'ALL',  cat:'Beratung'},
+
+      // AU / Behandlungsauftrag
+      {file:'behandlungsauftrag-Privat web.html',         title:'Behandlungsauftrag (Privat)',        patient:'both',  kv:'PKV',  cat:'Auftragsbestätigung (AU)'},
+
+      // Planbesprechung (Aufklärung)
+      {file:'aufklaerung-gkv-erw web.html',               title:'Ärztliche Aufklärung (GKV • Erwachsene)', patient:'adult', kv:'GKV', cat:'Planbesprechung'},
+      {file:'aufklaerung-gkv-kind web.html',              title:'Ärztliche Aufklärung (GKV • Kind)',       patient:'child', kv:'GKV', cat:'Planbesprechung'},
+      {file:'aufklaerung-privat-kind web.html',           title:'Ärztliche Aufklärung (Privat • Kind)',    patient:'child', kv:'PKV', cat:'Planbesprechung'},
+      {file:'aufklaerung-selbstzahler-erw web.html',      title:'Aufklärung (Selbstzahler • Erwachsene)',  patient:'adult', kv:'SELF',cat:'Planbesprechung'},
+
+      // AVL
+      {file:'AVL-Begleitleistungen-GKV web.html',         title:'Privatliquidation Begleitleistung (GKV)', patient:'both', kv:'GKV', cat:'AVL-Besprechung'},
+
+      // Privatabrechnung/Privatliquidation
+      {file:'information-zur-privatabrechnung web.html',  title:'Information zur Privatabrechnung',   patient:'both',  kv:'PKV',  cat:'Planbesprechung'},
+      {file:'vereinbarung-privatliquidation web.html',    title:'Vereinbarung Privatliquidation',     patient:'both',  kv:'PKV',  cat:'AVL-Besprechung'},
+
+      // Miniimplantat (Platzhalter – wenn vorhanden)
+      // {file:'einwilligung-miniimplantat.html', title:'Einwilligung Miniimplantat', patient:'both', kv:'ALL', cat:'Miniimplantat'}
+    ];
+
+    const CATS_ORDER = ['Beratung','Auftragsbestätigung (AU)','Planbesprechung','AVL-Besprechung','Miniimplantat','Sonstiges'];
+
+    // ======= Navigation Home → KV → ggf. Formular-Selector =======
+    document.getElementById('homeLink').addEventListener('click', (e)=>{e.preventDefault();showHome();});
+    document.querySelectorAll('.tile').forEach(t=>{
+      const go = ()=>{ pending = { patient:t.dataset.patient, status:t.dataset.status }; kvDialog.showModal(); };
+      t.addEventListener('click', (e)=>{ e.preventDefault(); go(); });
+      t.querySelector('.open').addEventListener('click', (e)=>{ e.preventDefault(); go(); });
+    });
+
+    kvDialog.querySelectorAll('.kv-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        kvType = btn.dataset.kv; 
+        kvDialog.close();
+        if (pending && pending.status === 'existing') {
+          openFormsDialog(); // Bestandspatient → Lightbox mit Form-Auswahl
+        } else {
+          currentKey = `${pending.patient}_${pending.status}_${kvType}`;
+          showForm(currentKey);       // Neupatient → direkt Anamnese
+        }
+      });
+    });
+
+    // ======= Formular-Selector (Bestandspatienten) =======
+    const selCount = document.getElementById('selCount');
+    const formSearch = document.getElementById('formSearch');
+    const btnRec = document.getElementById('btnRec');
+    const btnAll = document.getElementById('btnAll');
+    const btnNone = document.getElementById('btnNone');
+
+    document.getElementById('formsCancel').onclick = ()=> formsDialog.close();
+    document.getElementById('formsClose').onclick  = ()=> formsDialog.close();
+
+    function openFormsDialog(){
+      selectedExtraFiles = null;
+      formChoices.innerHTML = '';
+      document.getElementById('formselMeta').textContent =
+        `Formulare wählen – ${pending.patient==='adult'?'Erwachsene':'Kinder'} · ${kvType}`;
+
+      // Relevante Formulare anhand Patient/KV
+      const relevant = ALL_FORMS.filter(f => 
+        (f.patient==='both' || f.patient===pending.patient) &&
+        (f.kv==='ALL' || f.kv===kvType)
+      );
+
+      // nach Kategorien gruppieren
+      const grouped = {};
+      relevant.forEach(f=>{
+        const cat = f.cat || 'Sonstiges';
+        if(!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(f);
+      });
+
+      // Empfohlene
+      const recommended = new Set((FORM_MAP[pending.patient] && FORM_MAP[pending.patient][kvType]) || []);
+
+      // UI bauen
+      CATS_ORDER.forEach(cat=>{
+        if(!grouped[cat]) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'cat';
+        wrap.innerHTML = `<h4>${cat}</h4><div class="cat-grid"></div>`;
+        const grid = wrap.querySelector('.cat-grid');
+
+        grouped[cat].forEach(f=>{
+          const id = 'f_' + btoa(f.file).replace(/=/g,'');
+          const checked = recommended.has(f.file) ? 'checked' : '';
+          const sub = [];
+          if(f.patient!=='both') sub.push(f.patient==='adult'?'Erwachsene':'Kind');
+          if(f.kv!=='ALL') sub.push(f.kv);
+          grid.insertAdjacentHTML('beforeend',`
+            <label class="choice" data-title="${f.title.toLowerCase()}">
+              <input type="checkbox" data-file="${f.file}" id="${id}" ${checked}/>
+              <div>
+                <div class="t">${f.title}</div>
+                <div class="s">${sub.join(' · ')}</div>
+              </div>
+            </label>
+          `);
+        });
+
+        formChoices.appendChild(wrap);
+      });
+
+      // Suche
+      formSearch.value = '';
+      formSearch.oninput = () => {
+        const q = formSearch.value.trim().toLowerCase();
+        formChoices.querySelectorAll('.choice').forEach(ch=>{
+          const hit = ch.dataset.title.includes(q);
+          ch.style.display = hit ? '' : 'none';
+        });
+      };
+
+      // Schnellaktionen
+      btnRec.onclick = () => {
+        formChoices.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+          cb.checked = recommended.has(cb.dataset.file);
+        });
+        updateSelCount();
+      };
+      btnAll.onclick = () => {
+        formChoices.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.checked = true);
+        updateSelCount();
+      };
+      btnNone.onclick = () => {
+        formChoices.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.checked = false);
+        updateSelCount();
+      };
+
+      formChoices.addEventListener('change', e=>{
+        if(e.target.type==='checkbox') updateSelCount();
+      });
+      updateSelCount();
+
+      formsDialog.showModal();
+    }
+
+    function updateSelCount(){
+      const n = formChoices.querySelectorAll('input[type=checkbox]:checked').length;
+      selCount.textContent = `${n} gewählt`;
+    }
+
+    document.getElementById('formsConfirm').onclick = ()=>{
+      selectedExtraFiles = Array.from(formChoices.querySelectorAll('input[type=checkbox]:checked'))
+                                .map(i => i.dataset.file);
+      formsDialog.close();
+      currentKey = `${pending.patient}_${pending.status}_${kvType}`;
+      showForm(currentKey);
+    };
+
+    // ======= Utils & Form-Logik =======
+    function showHome(){ formView.classList.add('hidden'); homeView.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
+    document.getElementById('toHome').addEventListener('click',showHome);
+
+    const v = id => (document.getElementById(id)?.value || '');
+    function getPatientName(){
+      const name = [v('vorname'), v('nachname')].filter(Boolean).join(' ');
+      return name || '________________';
+    }
+
+    const kasse        = document.getElementById('kasse');
+    const kasseSonstige= document.getElementById('kasseSonstige');
+    const kasseFreitext= document.getElementById('kasseFreitext');
+    kasse.addEventListener('change', ()=>{
+      const other = kasse.value==='__OTHER__' || kvType==='SELF';
+      kasseSonstige.classList.toggle('hidden', !other);
+      if(!other){ kasseFreitext.value=''; }
+    });
+
+    document.addEventListener('change',(e)=>{
+      const r = e.target;
+      if(r.matches('input[type=radio][data-toggle]')){
+        const target = document.querySelector(r.dataset.toggle);
+        if(!target) return;
+        const yes = r.value==='Ja';
+        target.classList.toggle('hidden', !yes);
+        if(!yes){ target.querySelectorAll('input,textarea,select').forEach(el=>el.value=''); }
+      }
+    });
+
+    document.getElementById('aware_other')?.addEventListener('change', (e)=>{
+      document.getElementById('aware_other_text').classList.toggle('hidden', !e.target.checked);
+    });
+    document.getElementById('sym_sonst')?.addEventListener('change', (e)=>{
+      document.getElementById('sym_sonst_text').classList.toggle('hidden', !e.target.checked);
+    });
+
+    async function showForm(key){
+      formKeyPill.textContent = key.replaceAll('_',' · ');
+      const titleMap = {adult:'Erwachsene', child:'Kinder'};
+      formTitle.textContent = `Anmeldebogen für ${titleMap[pending.patient] || ''}`;
+
+      // Kinder: Erziehungsberechtigte nur bei Neupatient
+      const showGuardian = (pending.patient==='child' && pending.status!=='existing');
+      guardianBlock.classList.toggle('hidden', !showGuardian);
+      ['guard_name','guard_rel','guard_phone'].forEach(id=>{ const el=document.getElementById(id); if(el) el.required = showGuardian; });
+
+      // Kassenliste setzen (nur Neupatient sinnvoll)
+      const select = document.getElementById('kasse');
+      if (select){
+        select.innerHTML = `<option value="" selected disabled>Bitte wählen …</option>`;
+        let list = GKV_INSURERS;
+        if(kvType==='PKV') list = PKV_INSURERS;
+        if(kvType==='SELF') list = []; // Selbstzahler → nur Sonstige
+        list.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; select.appendChild(o); });
+        const o=document.createElement('option'); o.value='__OTHER__'; o.textContent='Sonstige / Andere (Freitext)'; select.appendChild(o);
+      }
+
+      // Anamnese ein-/ausblenden
+      const isExisting = pending.status==='existing';
+      document.querySelectorAll('.anam').forEach(fs=> fs.style.display = isExisting ? 'none' : '');
+
+      homeView.classList.add('hidden');
+      formView.classList.remove('hidden');
+      window.scrollTo({top:0,behavior:'smooth'});
+
+      requestAnimationFrame(resizeSig);
+
+      await loadExtraFormsIntoPage();
+    }
+
+    // ======= Zusatzformulare laden & einbetten =======
+    async function loadExtraFormsIntoPage(){
+      document.getElementById('extraForms')?.remove();
+
+      let files = selectedExtraFiles ?? ((FORM_MAP[pending?.patient] && FORM_MAP[pending.patient][kvType]) || []);
+      if(!files.length) return;
+
+      const wrap = document.createElement('div');
+      wrap.id = 'extraForms';
+      wrap.style.marginTop = '24px';
+
+      const pname = getPatientName();
+
+      async function fetchFile(name){
+        const url1 = FORMS_BASE + name;
+        const url2 = FORMS_BASE + encodeURIComponent(name);
+        try{ const r1 = await fetch(url1); if(r1.ok) return await r1.text(); }catch(_){}
+        const r2 = await fetch(url2); return await r2.text();
+      }
+
+      for(const fname of files){
+        const raw = await fetchFile(fname);
+        const replaced = raw.replace(/Patientenname|Name des Patienten|Name d.? Patienten/gi,
+                      `<span class="patient-name-autofill">${pname}</span>`);
+
+        const tmp = document.createElement('div'); tmp.innerHTML = replaced;
+        const heading = tmp.querySelector('h1, h2, legend');
+        const title = heading ? heading.textContent.trim() : fname.replace(/\.html$/,'');
+        if(heading) heading.remove();
+        const body = tmp.innerHTML;
+
+        const fieldset = document.createElement('fieldset');
+        fieldset.className = 'card';
+        fieldset.innerHTML = `<legend>${title}</legend>${body}`;
+        wrap.appendChild(fieldset);
+      }
+
+      document.getElementById('form').appendChild(wrap);
+
+      ['vorname','nachname'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('input', ()=>{
+          const nameNow = getPatientName();
+          document.querySelectorAll('.patient-name-autofill').forEach(n=>n.textContent = nameNow);
+        });
+      });
+    }
+
+    // ======= Signature =======
+    const sigCanvas = document.getElementById('sig');
+    const sctx = sigCanvas.getContext('2d');
+    let strokes=[], current=[], drawing=false;
+
+    function resizeSig(){
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = sigCanvas.getBoundingClientRect();
+      if(rect.width === 0){ setTimeout(resizeSig, 60); return; }
+      sigCanvas.width = rect.width * ratio;
+      sigCanvas.height = rect.height * ratio;
+      sctx.setTransform(ratio,0,0,ratio,0,0);
+      redrawSig();
+    }
+    function redrawSig(){
+      sctx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+      sctx.lineCap='round'; sctx.lineJoin='round'; sctx.strokeStyle='#000';
+      const draw = pts=>{
+        if(pts.length<2){ return; }
+        sctx.beginPath(); sctx.moveTo(pts[0].x, pts[0].y);
+        for(let i=1;i<pts.length-1;i++){
+          const mx=(pts[i].x+pts[i+1].x)/2, my=(pts[i].y+pts[i+1].y)/2;
+          sctx.lineWidth = 2 + (pts[i].p||0)*1.2;
+          sctx.quadraticCurveTo(pts[i].x,pts[i].y,mx,my);
+        }
+        sctx.stroke();
+      };
+      strokes.forEach(draw); if(current.length) draw(current);
+    }
+    function getPtFromEvent(e){
+      const rect=sigCanvas.getBoundingClientRect();
+      if(e.touches && e.touches[0]){
+        return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top,p:e.touches[0].force||0};
+      }
+      return {x:e.clientX-rect.left,y:e.clientY-rect.top,p:e.pressure||0};
+    }
+    function start(e){ e.preventDefault(); drawing=true; current=[getPtFromEvent(e)]; redrawSig(); }
+    function move(e){ if(!drawing)return; e.preventDefault(); current.push(getPtFromEvent(e)); redrawSig(); }
+    function end(){ if(!drawing)return; drawing=false; strokes.push(current); current=[]; redrawSig(); }
+
+    sigCanvas.addEventListener('pointerdown',start,{passive:false});
+    sigCanvas.addEventListener('pointermove',move,{passive:false});
+    window.addEventListener('pointerup',end,{passive:false});
+    sigCanvas.addEventListener('touchstart',start,{passive:false});
+    sigCanvas.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('touchend',end,{passive:false});
+
+    document.getElementById('clearSig').onclick=()=>{strokes=[];current=[];redrawSig();};
+    document.getElementById('undoSig').onclick=()=>{strokes.pop();redrawSig();};
+    window.addEventListener('resize',resizeSig);
+    (function setToday(){ const f=document.getElementById('datum'); if(f && !f.value) f.value=new Date().toISOString().slice(0,10) })();
+
+    // ======= PDF Export (inkl. Logo und eingebetteten Zusatzformularen) =======
+    document.getElementById('savePdf').addEventListener('click', async ()=>{
+      if(!window.jspdf || !window.jspdf.jsPDF){ alert('PDF-Modul lädt noch.'); return; }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'mm',format:'a4'});
+      const margin=14, lh=6; let y=18;
+      const W = doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+
+      await addLogo(doc, W, margin);
+
+      const isExisting = pending?.status === 'existing';
+
+      function heading(txt){
+        if(y>H-20){ doc.addPage(); y=18; }
+        doc.setFont(undefined,'bold'); doc.setFontSize(13);
+        doc.text(txt, margin, y); y+=lh+1;
+        doc.setFont(undefined,'normal'); doc.setFontSize(11);
+      }
+      function line(txt){
+        const lines = doc.splitTextToSize(txt, W-2*margin);
+        lines.forEach(l=>{ if(y>H-margin){doc.addPage(); y=18;} doc.text(l, margin, y); y+=lh; });
+      }
+
+      if(!isExisting){
+        heading(`Anmeldebogen – ${pending?.patient==='child'?'Kind':'Erwachsene'}${kvType?' · '+kvType:''}`);
+
+        heading('Persönliche Daten');
+        line(`Name: ${v('vorname')} ${v('nachname')}`);
+        line(`Geb.-Datum: ${v('geburtsdatum')}`);
+        line(`Adresse: ${v('strasse')}, ${v('plz')} ${v('wohnort')}`);
+        line(`Telefon: ${v('telefon')}  |  Mobil: ${v('mobil')}  |  E-Mail: ${v('email')}`);
+        line(`Arbeitgeber: ${v('arbeitgeber')}  |  Zahnarzt: ${v('zahnarzt')}`);
+        const kassenSelect = document.getElementById('kasse');
+        const kassenText = (kassenSelect && (kassenSelect.value==='__OTHER__'||kvType==='SELF')) ? v('kasseFreitext') : (kassenSelect?.value||'');
+        line(`Krankenkasse: ${kassenText}`);
+        line(`IBAN: ${v('iban')}  |  BIC: ${v('bic')}`);
+        y+=2;
+
+        heading('Vorbehandlung & Beschwerden');
+        const radiosVal = name => (form.elements[name] instanceof RadioNodeList ? (form.elements[name].value||'') : '');
+        line(`Vorbehandlung: ${radiosVal('vorbeh')}${form.elements['vorbeh_text']?.value?(' – '+form.elements['vorbeh_text'].value):''}`);
+        line(`Hauptbeschwerden: ${form.elements['stoert']?.value||''}`);
+        line(`Atmung: ${radiosVal('atmung')}`);
+        const sym = Array.from(document.querySelectorAll('.symptoms input[type=checkbox]:checked'))
+                          .map(c=>c.parentElement.textContent.trim());
+        if(sym.length) line(`Symptome: ${sym.join(', ')}`);
+        if(document.getElementById('sym_sonst')?.checked && form.elements['sym_sonst_text']?.value){
+          line(`Sonstige: ${form.elements['sym_sonst_text'].value}`);
+        }
+        y+=2;
+
+        heading('Besteht oder bestanden');
+        const pairs = [
+          ['allergie','Allergien'],['blut','Blutgerinnungsstörung'],['leber','Leberentzündung/Hepatitis/Gelbsucht'],
+          ['tbc','Tuberkulose'],['immun','Erkrankungen des Immunsystems'],['unfall','Unfälle im Zahn-/Kieferbereich'],
+          ['sonst_erkr','Sonstige Erkrankungen'],['medik','Regelmäßige Medikamente'],['rx','Röntgenaufnahmen (2 Jahre)'],
+          ['ss','Schwangerschaft']
+        ];
+        pairs.forEach(([name,label])=>{
+          const val = (form.elements[name] instanceof RadioNodeList) ? (form.elements[name].value||'') : '';
+          if(val) line(`${label}: ${val}`);
+          const container = document.querySelector(`#${name}_details`);
+          if(container && !container.classList.contains('hidden')){
+            const txt = Array.from(container.querySelectorAll('input,textarea')).map(e=>e.value).filter(Boolean).join('; ');
+            if(txt) line(`→ Details: ${txt}`);
+          }
+        });
+
+        const aware = Array.from(document.querySelectorAll('.awareness input[type=checkbox]:checked'))
+                           .map(c=>c.parentElement.textContent.trim());
+        if(aware.length){ line(`Aufmerksam geworden über: ${aware.join(', ')}`); }
+        if(!document.getElementById('aware_other_text')?.classList.contains('hidden')){
+          const ot = form.elements['aware_text']?.value; if(ot) line(`Sonstige: ${ot}`);
+        }
+        y+=3;
+
+        heading('Unterschrift');
+        line(`Datum: ${v('datum')}`);
+        try{
+          const exportCanvas = document.createElement('canvas');
+          exportCanvas.width = sigCanvas.width; exportCanvas.height = sigCanvas.height;
+          const ectx = exportCanvas.getContext('2d');
+          ectx.fillStyle='#fff'; ectx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
+          const draw = pts=>{
+            if(pts.length<2)return;
+            ectx.beginPath(); ectx.lineCap='round'; ectx.lineJoin='round'; ectx.strokeStyle='#000';
+            ectx.moveTo(pts[0].x,pts[0].y);
+            for(let i=1;i<pts.length-1;i++){
+              const mx=(pts[i].x+pts[i+1].x)/2, my=(pts[i].y+pts[i+1].y)/2;
+              ectx.lineWidth=2+(pts[i].p||0)*1.2; ectx.quadraticCurveTo(pts[i].x,pts[i].y,mx,my);
+            }
+            ectx.stroke();
+          };
+          strokes.forEach(draw);
+          const img = exportCanvas.toDataURL('image/png');
+          const maxW= W - 2*margin, maxH=35;
+          if(y>H-margin-maxH){ doc.addPage(); y=18; }
+          doc.addImage(img,'PNG', margin, y, maxW, maxH); y+=maxH+lh;
+        }catch(e){
+          line('— (Signatur konnte nicht eingebettet werden)');
+        }
+      }
+
+      await addExtraFormsToPdf(doc, margin);
+
+      const filename = `${new Date().toISOString().slice(0,10)}__${currentKey||'formulare'}.pdf`;
+      try{ doc.save(filename); }catch{ const url=doc.output('bloburl'); window.open(url,'_blank'); }
+    });
+
+    async function addExtraFormsToPdf(doc, margin){
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const sections = document.querySelectorAll('#extraForms fieldset.card');
+      for(const sec of sections){
+        await addDomToPdfAsImages(doc, sec, margin, W, H);
+      }
+    }
+
+    async function addDomToPdfAsImages(doc, el, margin, W, H){
+      const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff', useCORS:true, windowWidth:Math.max(document.documentElement.clientWidth, 1100)});
+      const imgW = W - 2*margin;
+      const ratio = imgW / canvas.width;
+      const pageInnerH = H - 2*margin;
+      const pageHpx = pageInnerH / ratio;
+
+      let sliceTop = 0;
+      let remaining = canvas.height;
+
+      while(remaining > 0){
+        const sliceHeight = Math.min(pageHpx, remaining);
+
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = sliceHeight;
+        const sctx = slice.getContext('2d');
+        sctx.fillStyle = '#fff';
+        sctx.fillRect(0,0,slice.width,slice.height);
+        sctx.drawImage(canvas, 0, sliceTop, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+        const data = slice.toDataURL('image/png');
+        doc.addPage();
+        doc.addImage(data, 'PNG', margin, 12, imgW, sliceHeight * ratio);
+
+        sliceTop += sliceHeight;
+        remaining -= sliceHeight;
+      }
+    }
+
+    // Logo in PDF einbetten
+    async function addLogo(doc, W, margin){
+      const logoTag = document.getElementById('orthoLogo'); if(!logoTag){ return; }
+      const img = new Image();
+      const src = logoTag.currentSrc || logoTag.src;
+      if (location.protocol.startsWith('http')) { img.crossOrigin = 'anonymous'; }
+      img.src = src;
+      await new Promise((res)=>{ img.onload=res; img.onerror=res; });
+      try{
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const cx = c.getContext('2d'); cx.drawImage(img,0,0);
+        const data = c.toDataURL('image/png');
+        const w = 55; const h = w * (img.naturalHeight/img.naturalWidth);
+        doc.addImage(data,'PNG', margin, 8, w, h);
+      }catch(e){
+        doc.setFont(undefined,'bold'); doc.setFontSize(16);
+        doc.text('Orthodont Kieferorthopädie', margin, 14);
+        doc.setFont(undefined,'normal'); doc.setFontSize(11);
+      }
+    }
+  </script>
+</body>
+</html>
